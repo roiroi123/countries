@@ -1,87 +1,74 @@
-const input = $("#input")
-const button = $("#button")
 
-function getCountriesFromServer () {
-    return new Promise((resolve, reject) => {
-        $.ajax({
-            url: "https://restcountries.eu/rest/v2/all",
-        }).done(function (data) {
-            resolve(data)
-        })
-    })
+function getCountriesFromServer() {
+  return new Promise((resolve, reject) => {
+    $.ajax({
+      url: "https://restcountries.eu/rest/v2/all",
+    }).done(function (data) {
+      resolve(data);
+    });
+  });
 }
-function searchCountriesFromServer (name) {
-    return new Promise((res, rej) => {
-        setTimeout(() => {
-            console.log("in server....")
-            const result = countries.filter(p => p.country === name)
-            if (!result.length) rej(`no result for the relevant search ${name}`)
-            res(result)
-        }, 10000)
-    })
-
+function searchCountriesFromServer(name) {
+  return new Promise((res, rej) => {
+    setTimeout(() => {
+      console.log("in server....");
+      const result = countries.filter((p) => p.country === name);
+      if (!result.length) rej(`no result for the relevant search ${name}`);
+      res(result);
+    }, 10000);
+  });
 }
-async function init () {
+async function init() {
+  const input = $("#input");
 
-    const input = $("#input")
-    const button = $("#button")
-    const container = $("#cardsContainer")
+  const button = $("#button");
+  const container = $("#cardsContainer");
 
-    button.on("click", async function () {
-       
-        console.log("hey");
-        //resolve =>>> then
-        // reject =>>> catch
+  const countries = await getCountriesFromServer();
+  button.on("click", function () {
+    // console.log(countries);
+    draw(countries);
+  });
 
-        try {
-            const result = await searchCountriesFromServer(input.val())
+  function draw(countries) {
+    const cardItems = getCountry(countries);
 
-            console.log("this is blocked!!!!!!!")
-            draw(result)
-        } catch (err) {
-            alert(err)
-            container.empty()
-        }
-        console.log("search end")
-    })
+    container.append(cardItems);
+  }
 
-    const countries = await getCountriesFromServer()
-    draw(countries)
+  function getCountry(countryData) {
+    const singleCountry = countryData.filter((e) => e.name === input.val());
+    const countryName = singleCountry[0].name;
+    const countryPopulation = singleCountry[0].population;
+    const countryCard = $(`<div class = "card"></div>`).css({ width: "18rem" });
+    const countryImgSVGUrl = singleCountry[0].flag
+    const countryImg = $(`<img class = "card-img-top" src =${countryImgSVGUrl}></img>`);
+    const cardBody = $(`<div class="card-body"></div>`);
+    const cardTitle = $(`<h5 class="card-title">${countryName}</h5>`);
+    const cardText = $(
+      `<p class="card-text">${countryName} is the best country in the World</p>`
+    );
+    const cardPopulation = $(
+      `<p class="text-muted"> Number of citizens : ${countryPopulation} </p>`
+    );
+    const deleteBtn = $(`<input type="button" id ="delete"  >`)
+      .addClass("btn btn-danger")
+      .val("X")
+      .css({ display: "block" });
+      deleteBtn.click(() => {
+        countryCard.fadeOut("slow" , ()=>{
+          this.remove()
+        });
+      });
 
-console.log(countries);
+    countryCard.append(deleteBtn);
+    countryCard.append(countryImg);
+    countryCard.append(cardBody);
+    cardBody.append(cardTitle);
+    cardBody.append(cardText);
+    cardBody.append(cardPopulation);
 
-
-
-
-    function draw (countries) {
-        container.empty()
-        const cardItems = countries.map((country) => {
-            return getCountry(countries)
-        })
-        container.append(...cardItems)
-    }
-
-    function getCountry (countryData) {
-        const filterdCountries = []
-        // console.log(countryData);
-       
-        
-        const countryName  = countryData.name
-        const countryCard = $(`<div class = "card"></div>`).css({"width" : "18rem"})
-        const countryImg = $(`<img class "card-img-top" = "></img>`)
-        const cardBody = $(`<div class="card-body"></div>`)
-        const cardTitle = $(`<h5 class="card-title">${countryName}</h5>`)
-        const cardText = $(`<p class="card-text">${countryName} is the best country in the World</p>`)
-
-        countryCard.append(countryImg)
-        countryCard.append(cardBody)
-        cardBody.append(cardTitle)
-        cardBody.append(cardText)
-
-        
-        return countryCard
-    }
-
+    return countryCard;
+  }
 }
-init()
-
+init();
