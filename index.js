@@ -1,32 +1,27 @@
-
+// all of the data
 function getCountriesFromServer() {
   return new Promise((resolve, reject) => {
     $.ajax({
       url: "https://restcountries.eu/rest/v2/all",
-    }).done(function (data) {
-      resolve(data);
+    }).done(function (countries) {
+      resolve(countries);
     });
   });
 }
-function searchCountriesFromServer(name) {
-  return new Promise((res, rej) => {
-    setTimeout(() => {
-      console.log("in server....");
-      const result = countries.filter((p) => p.country === name);
-      if (!result.length) rej(`no result for the relevant search ${name}`);
-      res(result);
-    }, 10000);
-  });
-}
+
+
 async function init() {
+  
   const input = $("#input");
+  const inputVal = input.val()
 
   const button = $("#button");
   const container = $("#cardsContainer");
 
   const countries = await getCountriesFromServer();
+  
   button.on("click", function () {
-    // console.log(countries);
+    
     draw(countries);
   });
 
@@ -36,12 +31,15 @@ async function init() {
     container.append(cardItems);
   }
 
+  
+  
+  // searching inside my own web not searching from the server
   function getCountry(countryData) {
-    const singleCountry = countryData.filter((e) => e.name === input.val());
-    const countryName = singleCountry[0].name;
-    const countryPopulation = singleCountry[0].population;
+    const singleCountry = countryData.find((e) => e.name === input.val());
+    const countryName = singleCountry.name;
+    const countryPopulation = singleCountry.population;
     const countryCard = $(`<div class = "card"></div>`).css({ width: "18rem" });
-    const countryImgSVGUrl = singleCountry[0].flag
+    const countryImgSVGUrl = singleCountry.flag
     const countryImg = $(`<img class = "card-img-top" src =${countryImgSVGUrl}></img>`);
     const cardBody = $(`<div class="card-body"></div>`);
     const cardTitle = $(`<h5 class="card-title">${countryName}</h5>`);
@@ -57,7 +55,7 @@ async function init() {
       .css({ display: "block" });
       deleteBtn.click(() => {
         countryCard.fadeOut("slow" , ()=>{
-          this.remove()
+          countryCard.remove()
         });
       });
 
